@@ -3,6 +3,7 @@ from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLineEdit, QLabel
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.WindowTemplate import WindowTemplate
@@ -51,9 +52,9 @@ class Form4(WindowTemplate):
 
     def populare_combobox_categorii(self):
         data = get_Category()
-
         for item in data:
-            self.category_cb.addItem(item)
+            print(item)
+            self.category_cb.addItem(str(item))
 
     def generate_graph(self):
         print('a')
@@ -99,4 +100,8 @@ class Form4(WindowTemplate):
 
         top_10_before_discount, top_10_after_discount = calculate_top_products_profit(category, discount)
 
-        export_top_products_profit(category, discount, top_10_before_discount, top_10_after_discount)
+
+
+        self.new_window = ExportTemplate("Export", "Form4",
+                                         [category, discount, top_10_before_discount, top_10_after_discount])
+        self.new_window.show()

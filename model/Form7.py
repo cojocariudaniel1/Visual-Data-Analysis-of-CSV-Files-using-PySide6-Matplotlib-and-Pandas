@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.WindowTemplate import WindowTemplate
@@ -73,4 +74,6 @@ class Form7(WindowTemplate):
         category = self.category_cb.currentText()
         states, profits, losses = profit_loss_by_state_category(category)
 
-        export_profit_loss_by_state_category(category, states, profits, losses)
+
+        self.new_window = ExportTemplate("Export", "Form7", [category, states, profits, losses])
+        self.new_window.show()

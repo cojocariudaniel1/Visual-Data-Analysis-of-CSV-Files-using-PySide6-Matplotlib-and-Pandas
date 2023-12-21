@@ -3,6 +3,7 @@ from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.WindowTemplate import WindowTemplate
@@ -64,4 +65,5 @@ class Form9(WindowTemplate):
         y_values = obj[1]
         ship_mode = self.shipmode_cb.currentText()
 
-        export_product_profitability(x_values, y_values, ship_mode)
+        self.new_window = ExportTemplate("Export", "Form9", [x_values, y_values, ship_mode])
+        self.new_window.show()

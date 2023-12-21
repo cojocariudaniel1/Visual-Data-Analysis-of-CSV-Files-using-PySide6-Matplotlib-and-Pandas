@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt, QRect, QTimer
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel, QSlider
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.WindowTemplate import WindowTemplate
@@ -15,6 +16,7 @@ class Form3(WindowTemplate):
         super().__init__(title_text)
 
         self.setObjectName("Form2")
+        self.new_window = None
 
         pixmap = QPixmap("imgs/x_ button.png")
         pixmap = pixmap.scaled(25, 25, Qt.KeepAspectRatio)
@@ -67,4 +69,5 @@ class Form3(WindowTemplate):
         self.show()
 
     def export_graph(self):
-        export_least_profitable_products(self.state_cb.currentText(), int(self.horizontalSlider.value()))
+        self.new_window = ExportTemplate("Export", "Form3", [self.state_cb.currentText(), int(self.horizontalSlider.value())] )
+        self.new_window.show()

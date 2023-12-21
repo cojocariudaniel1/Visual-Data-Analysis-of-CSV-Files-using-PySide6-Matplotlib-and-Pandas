@@ -34,7 +34,7 @@ import logging
 
 def export_product_profitability(x_values, y_values, ship_mode, filename="product_profitability_by_state.xlsx"):
     try:
-        workbook = xlsxwriter.Workbook(filename)
+        workbook = xlsxwriter.Workbook(filename[0])
         worksheet = workbook.add_worksheet()
 
         worksheet.write_row('A1', ["Product Name", "State"])
@@ -61,7 +61,7 @@ def export_product_profitability(x_values, y_values, ship_mode, filename="produc
         worksheet.insert_chart('D5', chart)
 
         workbook.close()
-        full_path_to_file = os.path.abspath(filename)
+        full_path_to_file = os.path.abspath(filename[0])
         os.startfile(full_path_to_file)
 
     except BaseException as e:

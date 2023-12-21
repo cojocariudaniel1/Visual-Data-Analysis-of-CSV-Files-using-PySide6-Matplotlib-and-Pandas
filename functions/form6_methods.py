@@ -23,9 +23,9 @@ def get_bottom_profit_products(subcategory):
     return x_values, y_values
 
 
-def export_bottom_profit_products(subcategory, x_values, y_values, patch="bottom_profit_products.xlsx"):
+def export_bottom_profit_products(subcategory, x_values, y_values, trendLineAttrs=None, patch="bottom_profit_products.xlsx"):
     try:
-        workbook = xlsxwriter.Workbook(patch)
+        workbook = xlsxwriter.Workbook(patch[0])
         worksheet = workbook.add_worksheet()
 
         worksheet.write_row('A1', ["Product Name", "Profit"])
@@ -33,16 +33,24 @@ def export_bottom_profit_products(subcategory, x_values, y_values, patch="bottom
         worksheet.write_column('B2', y_values)
 
         chart = workbook.add_chart({'type': 'bar'})
-        chart.add_series({
-            'name': 'Profit',
-            'categories': f'=Sheet1!$A$2:$A${len(x_values) + 1}',
-            'values': f'=Sheet1!$B$2:$B${len(y_values) + 1}',
-            'data_labels': {'value': True},
-        })
+        if trendLineAttrs:
+            chart.add_series({
+                'name': 'Profit',
+                'categories': f'=Sheet1!$A$2:$A${len(x_values) + 1}',
+                'values': f'=Sheet1!$B$2:$B${len(y_values) + 1}',
+                'data_labels': {'value': True},
+            })
+        else:
+            chart.add_series({
+                'name': 'Profit',
+                'categories': f'=Sheet1!$A$2:$A${len(x_values) + 1}',
+                'values': f'=Sheet1!$B$2:$B${len(y_values) + 1}',
+                'data_labels': {'value': True},
+            })
         worksheet.insert_chart('D2', chart)
 
         workbook.close()
-        full_path_to_file = str(patch)
+        full_path_to_file = str(patch[0])
         os.startfile(full_path_to_file)
 
     except BaseException as e:

@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.WindowTemplate import WindowTemplate
@@ -63,5 +64,6 @@ class Form6(WindowTemplate):
         subcategory = self.sub_category_cb.currentText()
         x_values, y_values = get_bottom_profit_products(subcategory)
 
-        export_bottom_profit_products(subcategory, x_values, y_values)
+        self.new_window = ExportTemplate("Export", "Form6", [subcategory, x_values, y_values])
+        self.new_window.show()
 

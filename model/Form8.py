@@ -6,6 +6,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 from matplotlib import pyplot as plt
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.QTRadioButton import RadioButton
@@ -97,7 +98,8 @@ class Form8(WindowTemplate):
 
             chart_type = "pie" if self.alegere_grafic_cb.currentText() == "Pie" else "bar" if self.alegere_grafic_cb.currentText() == "Bar" else "barh"
 
-            export_order_processing_duration_graph(x_data, y_data, bool, chart_type)
 
+            self.new_window = ExportTemplate("Export", "Form8", [x_data, y_data, bool, chart_type])
+            self.new_window.show()
         except BaseException as e:
             logging.exception(e)

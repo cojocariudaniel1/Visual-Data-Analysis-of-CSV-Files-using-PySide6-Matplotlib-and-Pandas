@@ -7,6 +7,9 @@ import xlsxwriter
 import os
 import logging
 
+from functions.form3_methods import chart_trendline
+
+
 def calculate_top_products_profit(category, discount):
     df = get_data()
     df = df[df["Category"] == category]
@@ -22,7 +25,7 @@ def calculate_top_products_profit(category, discount):
     return top_10_before_discount, top_10_after_discount
 
 
-def export_top_products_profit(category, discount, top_10_before_discount, top_10_after_discount, patch="top_products_profit.xlsx"):
+def export_top_products_profit(category, discount, top_10_before_discount, top_10_after_discount,  trendLineAttrs=None, patch="top_products_profit.xlsx"):
     try:
         workbook = xlsxwriter.Workbook(patch)
         worksheet = workbook.add_worksheet()
@@ -39,11 +42,20 @@ def export_top_products_profit(category, discount, top_10_before_discount, top_1
             'categories': f'=Sheet1!$A$2:$A${data_len}',
             'values': f'=Sheet1!$B$2:$B${data_len}',
         })
-        chart.add_series({
-            'name': '=Sheet1!$C$1',
-            'categories': f'=Sheet1!$A$2:$A${data_len}',
-            'values': f'=Sheet1!$C$2:$C${data_len}',
-        })
+        if trendLineAttrs:
+            chart.add_series({
+                'name': '=Sheet1!$C$1',
+                'categories': f'=Sheet1!$A$2:$A${data_len}',
+                'values': f'=Sheet1!$C$2:$C${data_len}',
+                'trendline': chart_trendline(trendLineAttrs)
+
+            })
+        else:
+            chart.add_series({
+                'name': '=Sheet1!$C$1',
+                'categories': f'=Sheet1!$A$2:$A${data_len}',
+                'values': f'=Sheet1!$C$2:$C${data_len}',
+            })
         worksheet.insert_chart('E2', chart)
         worksheet.conditional_format(f'B2:B{data_len}', {'type': '3_color_scale'})
         worksheet.conditional_format(f'C2:C{data_len}', {'type': '3_color_scale'})

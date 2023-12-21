@@ -2,11 +2,12 @@ import pandas as pd
 
 
 def get_data():
-    file_name = "baza_de_date.xls"
+    file_name = "baza_de_date1.xls"
     sheet = "superstore"
     df = pd.read_excel(io=file_name, sheet_name=sheet, usecols="A:U")
 
     dataframe = pd.DataFrame(df)
+    print(dataframe.columns)
     return dataframe
 
 
@@ -19,28 +20,26 @@ def get_City():
 def get_Category():
     dataframe = get_data()
     all_Category = dataframe["Category"].drop_duplicates().tolist()
+    print(all_Category)
     return all_Category
-
 
 def get_State():
     dataframe = get_data()
-    all_states = dataframe["State"].drop_duplicates().tolist()
-    return all_states
-
-
-def get_subCategory():
-    dateframe = get_data()
-    all_sub_category = dateframe["Sub-Category"].drop_duplicates().tolist()
-    return all_sub_category
-
+    all_State = dataframe["State"].drop_duplicates().tolist()
+    return all_State
 
 def get_Segment():
-    dateframe = get_data()
-    segment = dateframe["Segment"].drop_duplicates().tolist()
-    return segment
+    dataframe = get_data()
+    all_segment = dataframe["Segmet"].drop_duplicates().tolist()
+    return all_segment
+
+def get_subCategory():
+    dataframe = get_data()
+    subcategory = dataframe["Sub-Category"].drop_duplicates().tolist()
+    return subcategory
 
 
 def get_ShipMode():
-    dateframe = get_data()
-    shipmode = dateframe["Ship Mode"].drop_duplicates().tolist()
-    return shipmode
+    dataframe = get_data()
+    ship_mode = dataframe["Ship Mode"].drop_duplicates().tolist()
+    return ship_mode

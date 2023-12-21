@@ -5,6 +5,9 @@ import xlsxwriter
 import os
 import logging
 
+from functions.form3_methods import chart_trendline
+
+
 def frecventa_categorii_pe_subcategorie(categorie):
     dataframe = get_data()
     filtered_data = dataframe[dataframe['Category'] == categorie]
@@ -18,10 +21,10 @@ def frecventa_categorii_pe_subcategorie(categorie):
     return subcategories, sales, profit
 
 
-def export_frecventa_categorii_pe_subcategorie(categorie, tip_date, patch="frecventa_categorii_pe_subcategorie.xlsx"):
+def export_frecventa_categorii_pe_subcategorie(categorie, tip_date, trendLineAttrs=None, patch="frecventa_categorii_pe_subcategorie.xlsx"):
     try:
         obj = frecventa_categorii_pe_subcategorie(categorie)
-        workbook = xlsxwriter.Workbook(patch)
+        workbook = xlsxwriter.Workbook(patch[0])
         worksheet = workbook.add_worksheet()
 
         if tip_date == 'vanzari':
@@ -35,16 +38,25 @@ def export_frecventa_categorii_pe_subcategorie(categorie, tip_date, patch="frecv
 
         chart = workbook.add_chart({'type': 'column'})
         data_len = len(obj[0]) + 1
-        chart.add_series({
-            'name': f'=Sheet1${"B" if tip_date == "vanzari" else "C"}$1',
-            'categories': f'=Sheet1!$A$2:$A${data_len}',
-            'values': f'=Sheet1!${"B" if tip_date == "vanzari" else "C"}$2:${"B" if tip_date == "vanzari" else "C"}${data_len}',
-        })
+        if trendLineAttrs:
+            chart.add_series({
+                'name': f'=Sheet1${"B" if tip_date == "vanzari" else "C"}$1',
+                'categories': f'=Sheet1!$A$2:$A${data_len}',
+                'values': f'=Sheet1!${"B" if tip_date == "vanzari" else "C"}$2:${"B" if tip_date == "vanzari" else "C"}${data_len}',
+                'trendline': chart_trendline(trendLineAttrs)
+
+            })
+        else:
+            chart.add_series({
+                'name': f'=Sheet1${"B" if tip_date == "vanzari" else "C"}$1',
+                'categories': f'=Sheet1!$A$2:$A${data_len}',
+                'values': f'=Sheet1!${"B" if tip_date == "vanzari" else "C"}$2:${"B" if tip_date == "vanzari" else "C"}${data_len}',
+            })
         worksheet.insert_chart('D2', chart)
         worksheet.conditional_format(f'B2:B{data_len}' if tip_date == 'vanzari' else f'C2:C{data_len}', {'type': '3_color_scale'})
 
         workbook.close()
-        full_path_to_file = str(patch)
+        full_path_to_file = str(patch[0])
         os.startfile(full_path_to_file)
 
     except BaseException as e:

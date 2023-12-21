@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QGraphicsDropShadowEffect, QPushButton
 
 
 class Button(QPushButton):
-    def __init__(self, text, func, parent=None, ):
+    def __init__(self, text, func = None, parent=None, ):
         super().__init__(parent)
         self.setObjectName("QButtonCustom")
         # Default Style of the object

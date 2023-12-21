@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.QTRadioButton import RadioButton
@@ -77,4 +78,5 @@ class Form2(WindowTemplate):
 
     def export_graph(self):
         tip_date = 'vanzari' if self.vanzari_rb.isChecked() else 'profit'
-        export_frecventa_categorii_pe_subcategorie(self.category_cb.currentText(), tip_date)
+        self.new_window = ExportTemplate("Export", "Form2", [self.category_cb.currentText(), tip_date])
+        self.new_window.show()

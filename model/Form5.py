@@ -1,10 +1,13 @@
 import numpy as np
+import pandas as pd
 from PySide6 import QtWidgets, QtGui
 from PySide6.QtCore import Qt, QRect, QDate
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QLabel, QSlider
+from PySide6.QtWidgets import QLabel, QSlider, QLineEdit
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
+from design.style1.QLineEdit import QLineEditX
 from design.style1.QTComboBox import QTComboBox
 from design.style1.WindowTemplate import WindowTemplate
 from functions.basic_functions import get_Segment, get_subCategory
@@ -20,7 +23,6 @@ def calculate_month_difference(start_date, end_date):
 
     year_difference = end_qdate.year() - start_qdate.year()
     month_difference = end_qdate.month() - start_qdate.month() + year_difference * 12
-    print(month_difference)
     return month_difference
 
 
@@ -48,19 +50,35 @@ class Form5(WindowTemplate):
 
         self.horizontalSlider = QSlider(self)
         self.horizontalSlider.setOrientation(Qt.Horizontal)
-        self.horizontalSlider.setGeometry(QRect(100, 185, 500, 30))
+        self.horizontalSlider.setGeometry(QRect(250, 185, 400, 30))
         self.horizontalSlider.setMinimum(0)
         self.horizontalSlider.setMaximum(120)  # Asumăm că avem 12 luni înainte
         self.horizontalSlider.valueChanged.connect(self.update_label)
-        self.slider_label_text = QLabel(f"Selected Date", self)
-        self.slider_label_text.setGeometry(QRect(620, 185, 200, 30))
         self.horizontalSlider.setValue(0)
         self.button.func = self.generate_graph
         self.button.setGeometry(QRect(665, 140, 175, 40))
         self.current_date = None
         self.selected_date = None
-        self.get_date()
+        self.initial_min_date = None
+        self.initial_max_date = None
         self.export.func = self.export_graph
+
+        self.mindate_label = QLabel("Min Date", self)
+        self.mindate_label.setGeometry(QRect(50, 170, 100, 50))
+        self.mindate_lineEdit = QLineEditX("", self)
+        self.mindate_lineEdit.setGeometry(QRect(115, 180, 100, 30))
+
+        self.mindate_lineEdit.enterPressed.connect(self.update_min_form)
+
+        self.maxdate_label = QLabel("Max Date", self)
+        self.maxdate_label.setGeometry(QRect(670, 170, 100, 50))
+        self.maxdate_lineEdit = QLineEditX("", self)
+        self.maxdate_lineEdit.setGeometry(QRect(730, 180, 100, 30))
+
+        self.maxdate_lineEdit.enterPressed.connect(self.update_max_form)
+
+        self.get_initial_date()
+
     def populare_combobox_segment(self):
         data = get_subCategory()
 
@@ -69,8 +87,37 @@ class Form5(WindowTemplate):
 
     def update_label(self):
         selected_month = self.horizontalSlider.value()
-        self.slider_label_text.setText(self.get_date_string(selected_month))
+        self.mindate_lineEdit.setText(self.get_date_string(selected_month))
 
+    def update_min_form(self):
+        end_date = pd.to_datetime(self.mindate_lineEdit.text())
+        value = calculate_month_difference(self.initial_min_date, end_date)
+        self.horizontalSlider.setValue(value)
+
+    def update_max_form(self):
+        max_date = pd.to_datetime(self.maxdate_lineEdit.text())
+        min_date = pd.to_datetime(self.mindate_lineEdit.text())
+
+        month_difference = calculate_month_difference(min_date, max_date)
+        self.horizontalSlider.setMaximum(int(month_difference))
+
+    def get_initial_date(self):
+        obj = get_profit_evolution_by_subcategory_with_dates("Tables")
+        start_date = obj[2]
+        end_date = obj[3]
+        start_str = start_date.strftime('%Y-%m-%d')
+        end_str = end_date.strftime('%Y-%m-%d')
+
+        start_qdate = QDate.fromString(start_str, "yyyy-MM-dd")
+        end_qdate = QDate.fromString(end_str, "yyyy-MM-dd")
+        self.selected_date = end_qdate.toString('yyyy-MM-dd')
+        self.current_date = start_qdate
+        self.initial_min_date = start_date
+        self.initial_max_date = end_date
+        month_difference = calculate_month_difference(start_date, end_date)
+        self.mindate_lineEdit.setText(f"{start_qdate.toString('yyyy-MM-dd')}")
+        self.maxdate_lineEdit.setText(f"{end_qdate.toString('yyyy-MM-dd')}")
+        self.horizontalSlider.setMaximum(int(month_difference))
 
     def get_date(self):
         obj = get_profit_evolution_by_subcategory_with_dates("Tables")
@@ -84,22 +131,25 @@ class Form5(WindowTemplate):
         self.selected_date = end_qdate.toString('yyyy-MM-dd')
         self.current_date = start_qdate
         month_difference = calculate_month_difference(start_date, end_date)
-        self.slider_label_text.setText(f"Selected Date: {start_qdate.toString('yyyy-MM-dd')}")
+        self.mindate_lineEdit.setText(f"{start_qdate.toString('yyyy-MM-dd')}")
         self.horizontalSlider.setMaximum(int(month_difference))
+        print('cccc')
 
     def get_date_string(self, selected_month):
         print(self.current_date)
         future_date = self.current_date.addMonths(selected_month)
         self.selected_date = future_date.toString('yyyy-MM-dd')
         print(future_date)
-        return f"Selected Date: {future_date.toString('yyyy-MM-dd')}"
+        return f"{future_date.toString('yyyy-MM-dd')}"
 
     def generate_graph(self):
         self.sc.axes.clear()
         list1 = []
+        min_date = self.mindate_lineEdit.text()
+        max_date = self.maxdate_lineEdit.text()
+
         obj = get_profit_evolution_by_subcategory_with_dates(self.segment_cb.currentText(),
-                                                             self.current_date.toString('yyyy-MM-dd'),
-                                                             self.selected_date
+                                                             min_date, max_date
                                                              )
         x, y = obj[0], obj[1]
 
@@ -110,24 +160,17 @@ class Form5(WindowTemplate):
         print(x)
         self.sc.axes.set_xlabel('Produse')
         self.sc.axes.set_ylabel('Profit')
-        z = np.polyfit(list1,y, 2)
-        p = np.poly1d(z)
-        self.sc.axes.tick_params(axis="x", labelrotation=90)
-        self.sc.axes.plot(x, p(list1), color='red')
 
+        self.sc.axes.tick_params(axis="x", labelrotation=90)
         self.sc.draw()
         self.show()
 
     def export_graph(self):
         obj = get_profit_evolution_by_subcategory_with_dates(self.segment_cb.currentText(),
-                                                             self.current_date.toString('yyyy-MM-dd'),
-                                                             self.selected_date
+                                                             self.mindate_lineEdit.text(),
+                                                             self.maxdate_lineEdit.text()
                                                              )
         x, y, date_min, date_max = obj[0], obj[1], obj[2], obj[3]
 
-        list1 = [idx for idx, _ in enumerate(x)]
-
-        z = np.polyfit(list1, y, 2)
-        p = np.poly1d(z)
-
-        export_profit_evolution(self.segment_cb.currentText(), date_min, date_max, x, y, p(list1))
+        self.new_window = ExportTemplate("Export", "Form5", [self.segment_cb.currentText(), pd.to_datetime(self.mindate_lineEdit.text()), pd.to_datetime(self.maxdate_lineEdit.text()), x, y])
+        self.new_window.show()

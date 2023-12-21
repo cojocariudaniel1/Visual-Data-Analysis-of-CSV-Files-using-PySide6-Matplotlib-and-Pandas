@@ -6,7 +6,8 @@ import xlsxwriter
 import os
 import logging
 
-def find_least_profitable_products(state=None, nr_product = 10):
+
+def find_least_profitable_products(state=None, nr_product=10):
     dataframe = get_data()
     if state:
         dataframe_filter = dataframe[dataframe["State"] == state]
@@ -29,11 +30,10 @@ def find_least_profitable_products(state=None, nr_product = 10):
     return obj
 
 
-
-def export_least_profitable_products(state, nr_products, patch="least_profitable_products.xlsx"):
+def export_least_profitable_products(state, nr_products, trendLineAttrs=None, patch="least_profitable_products.xlsx"):
     try:
         obj = find_least_profitable_products(state, nr_products)
-        workbook = xlsxwriter.Workbook(patch)
+        workbook = xlsxwriter.Workbook(patch[0])
         worksheet = workbook.add_worksheet()
 
         worksheet.write_row('A1', ["Product ID", "Profit"])
@@ -42,17 +42,90 @@ def export_least_profitable_products(state, nr_products, patch="least_profitable
 
         chart = workbook.add_chart({'type': 'line'})
         data_len = len(obj[0]) + 1
-        chart.add_series({
-            'name': '=Sheet1!$B$1',
-            'categories': f'=Sheet1!$A$2:$A${data_len}',
-            'values': f'=Sheet1!$B$2:$B${data_len}',
-        })
+
+        if trendLineAttrs:
+            chart.add_series({
+                'name': '=Sheet1!$B$1',
+                'categories': f'=Sheet1!$A$2:$A${data_len}',
+                'values': f'=Sheet1!$B$2:$B${data_len}',
+                'trendline': chart_trendline(trendLineAttrs)
+            })
+        else:
+            chart.add_series({
+                'name': '=Sheet1!$B$1',
+                'categories': f'=Sheet1!$A$2:$A${data_len}',
+                'values': f'=Sheet1!$B$2:$B${data_len}',
+            })
+
         worksheet.insert_chart('D2', chart)
         worksheet.conditional_format(f'B2:B{data_len}', {'type': '3_color_scale'})
 
         workbook.close()
-        full_path_to_file = str(patch)
+        full_path_to_file = str(patch[0])
         os.startfile(full_path_to_file)
 
     except BaseException as e:
         logging.exception(e)
+
+
+def chart_trendline(trend_line_attrs):
+    if trend_line_attrs["type"] == "polynomial":
+        return {
+
+            'type': trend_line_attrs['type'],
+            'name': trend_line_attrs['name'],
+            'order': trend_line_attrs['order'],
+            'forward': trend_line_attrs['forward'],
+            'backward': trend_line_attrs['backward'],
+            'display_r_squared': trend_line_attrs['r_square'],
+            'display_equation': trend_line_attrs['equation'],
+            'line': {
+                'color': trend_line_attrs['line_color'],
+                'width': trend_line_attrs['line_width'],
+            },
+        }
+    elif trend_line_attrs["type"] == "moving_average":
+        return {
+            'type': trend_line_attrs["type"],
+            'name': trend_line_attrs['name'],
+            'period': trend_line_attrs["period"],
+            'line': {
+                'color': trend_line_attrs['line_color'],
+                'width': trend_line_attrs['line_width'],
+            },
+        }
+    elif trend_line_attrs["type"] == "linear" or trend_line_attrs["type"] == "exponential":
+        return {
+            'type': trend_line_attrs["type"],
+            'name': trend_line_attrs['name'],
+            'intercept': trend_line_attrs["intercept"],
+            'display_r_squared': trend_line_attrs['r_square'],
+            'display_equation': trend_line_attrs['equation'],
+            'forward': trend_line_attrs['forward'],
+            'backward': trend_line_attrs['backward'],
+            'line': {
+                'color': trend_line_attrs['line_color'],
+                'width': trend_line_attrs['line_width'],
+
+            },
+        }
+    elif trend_line_attrs["type"] == "power":
+        return {
+            "type": trend_line_attrs["type"],
+            "name": trend_line_attrs["name"],
+            'line': {
+                'color': trend_line_attrs['line_color'],
+                'width': trend_line_attrs['line_width'],
+
+            },
+        }
+    elif trend_line_attrs["type"] == "log":
+        return {
+            "type": trend_line_attrs["type"],
+            "name": trend_line_attrs["name"],
+            'line': {
+                'color': trend_line_attrs['line_color'],
+                'width': trend_line_attrs['line_width'],
+
+            },
+        }

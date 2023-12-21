@@ -1,8 +1,9 @@
-from PySide6 import QtGui
+from PySide6 import QtGui, QtWidgets
 from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
 
+from ExportTemplate import ExportTemplate
 from design.style1.QLabelXButton import QLabelXButton
 from design.style1.QTComboBox import QTComboBox
 from design.style1.WindowTemplate import WindowTemplate
@@ -32,7 +33,10 @@ class Form1(WindowTemplate):
 
         self.button.func = self.generate_graph
         self.export.func = self.export_graph
+
         self.populate_combobox()
+
+        self.new_window = None
 
     def populate_combobox(self):
         cities = get_City()
@@ -65,4 +69,7 @@ class Form1(WindowTemplate):
         self.show()
 
     def export_graph(self):
-        export_evidentiere_comenzi_oras(self.cities_cb.currentText())
+        self.new_window = ExportTemplate("Export", "Form1", [self.cities_cb.currentText()])
+        self.new_window.show()
+
+

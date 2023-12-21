@@ -31,7 +31,7 @@ def profit_loss_by_state_category(category):
 
 def export_profit_loss_by_state_category(category, states, profits, losses, patch="profit_loss_by_state_category.xlsx"):
     try:
-        workbook = xlsxwriter.Workbook(patch)
+        workbook = xlsxwriter.Workbook(patch[0])
         worksheet = workbook.add_worksheet()
 
         worksheet.write_row('A1', ["State", "Profit", "Loss"])
@@ -53,7 +53,7 @@ def export_profit_loss_by_state_category(category, states, profits, losses, patc
         worksheet.insert_chart('E2', chart)
 
         workbook.close()
-        full_path_to_file = str(patch)
+        full_path_to_file = str(patch[0])
         os.startfile(full_path_to_file)
 
     except BaseException as e:

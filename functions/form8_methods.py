@@ -48,7 +48,7 @@ def order_processing_duration_by_subcategory():
 
 def export_order_processing_duration_graph(x_data, y_data, bool_category, chart_type, filename="order_processing_duration_graph.xlsx"):
     try:
-        workbook = xlsxwriter.Workbook(filename)
+        workbook = xlsxwriter.Workbook(filename[0])
         worksheet = workbook.add_worksheet()
 
 
@@ -67,7 +67,7 @@ def export_order_processing_duration_graph(x_data, y_data, bool_category, chart_
         worksheet.insert_chart('D2', chart)
 
         workbook.close()
-        full_path_to_file = os.path.abspath(filename)
+        full_path_to_file = os.path.abspath(filename[0])
         os.startfile(full_path_to_file)
 
     except BaseException as e:

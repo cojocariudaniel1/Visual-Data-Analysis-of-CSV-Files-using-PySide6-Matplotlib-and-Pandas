@@ -5,6 +5,7 @@ import os
 import logging
 
 from functions.basic_functions import get_data
+from functions.form3_methods import chart_trendline
 
 
 def get_profit_evolution_by_subcategory_with_dates(sub_category, date_min=None, date_max=None):
@@ -50,9 +51,9 @@ import xlsxwriter
 import os
 import logging
 
-def export_profit_evolution(sub_category, date_min, date_max, x_values, y_values, trendline_values, patch="profit_evolution.xlsx"):
+def export_profit_evolution(sub_category, date_min, date_max, x_values, y_values,trendLineAttrs=None, patch="profit_evolution.xlsx"):
     try:
-        workbook = xlsxwriter.Workbook(patch)
+        workbook = xlsxwriter.Workbook(patch[0])
         worksheet = workbook.add_worksheet()
 
         # Adaugă datele în fișierul Excel
@@ -60,28 +61,28 @@ def export_profit_evolution(sub_category, date_min, date_max, x_values, y_values
         worksheet.write_column('A2', x_values)
         worksheet.write_column('B2', y_values)
 
-        # Adaugă trendline_values în fișierul Excel
-        trendline_formula = '={}'.format(','.join(str(val) for val in trendline_values))
-        worksheet.write_row('C1', ['Trendline'])
-        worksheet.write_row('C2', [trendline_formula])
 
         # Adaugă graficul în fișierul Excel
         chart = workbook.add_chart({'type': 'line'})
-        chart.add_series({
-            'name': 'Profit',
-            'categories': f'=Sheet1!$A$2:$A${len(x_values) + 1}',
-            'values': f'=Sheet1!$B$2:$B${len(y_values) + 1}',
-        })
-        chart.add_series({
-            'name': 'Trendline',
-            'categories': f'=Sheet1!$A$2:$A${len(x_values) + 1}',
-            'values': f'=Sheet1!$C$2:$C${len(trendline_values) + 1}',
-            'line': {'color': 'red'},
-        })
+        if trendLineAttrs:
+            chart.add_series({
+                'name': 'Profit',
+                'categories': f'=Sheet1!$A$2:$A${len(x_values) + 1}',
+                'values': f'=Sheet1!$B$2:$B${len(y_values) + 1}',
+                'trendline': chart_trendline(trendLineAttrs)
+
+            })
+        else:
+            chart.add_series({
+                'name': 'Profit',
+                'categories': f'=Sheet1!$A$2:$A${len(x_values) + 1}',
+                'values': f'=Sheet1!$B$2:$B${len(y_values) + 1}',
+            })
+
         worksheet.insert_chart('E2', chart)
 
         workbook.close()
-        full_path_to_file = str(patch)
+        full_path_to_file = str(patch[0])
         os.startfile(full_path_to_file)
 
     except BaseException as e:
